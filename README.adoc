@@ -25,14 +25,14 @@ pip install .
 == Configuration
 === Nginx
 
-* Configure GSS authentication
+Configure GSS authentication.
 
 ----
 auth_gss on;
 auth_gss_keytab /path/to/keytab;
 ----
 
-* Add location block for additional authentication
+Add location block for additional authentication.
 
 ----
 location /auth/ { # <1>
@@ -48,7 +48,7 @@ location /auth/ { # <1>
 <4> Add a header to pass the original request URI to the proxy.
 <5> Forward the request to an <<acl-auth, authentication server>> running on localhost at port 5000.
 
-* Add location block for application
+Add location block for application.
 
 ----
 location /.../ {
