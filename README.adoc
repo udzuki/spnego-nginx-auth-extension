@@ -91,11 +91,11 @@ Export the following environment variables and run the authentication server.
 |===
 | Environment Variable    | Description
 
-| `AD_SERVER`             | Active Directory server
+| `AD_SERVER`             | Active Directory server host
 | `CONFIG_PATH`           | Path to the <<ACL, ACL config file>>
-| `KEYTAB_PATH`           | Path to the keytab file
+| `KEYTAB_PATH`           | Path to the keytab file(same as `auth_gss_keytab` in Nginx configuration)
 | `LDAP_SEARCH_BASE`      | LDAP search base used to search for group membership
-| `SERVER_PRINCIPAL_NAME` | Server principal name
+| `SERVER_PRINCIPAL_NAME` | Server principal name, which can be obtained by running `klist -k $KEYTAB_PATH`
 |===
 
 ----
