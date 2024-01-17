@@ -1,0 +1,109 @@
+= SPNEGO HTTP Auth Extension for Nginx
+
+The SPNEGO HTTP Auth Extension for Nginx is a flexible authentication solution designed to extend the capabilities of the https://github.com/stnoonan/spnego-http-auth-nginx-module[spnego-http-auth-nginx-module]. It enhances Nginx's authentication mechanism by providing additional user and group authentication features. This extension is particularly useful in environments where enhanced security and precise access control are required.
+
+== Key Features
+
+* User Authentication: Validates users based on their usernames, ensuring that only authorized individuals can access specific resources.
+* Group Authentication: Offers the ability to authenticate users based on group membership, adding an extra layer of security and organizational control.
+* Integration with Active Directory: Utilizes connections to Active Directory (AD) servers for user and group verification, making it suitable for enterprise environments.
+* SPNEGO Support: Works in conjunction with the SPNEGO module, thus supporting Kerberos authentication mechanisms.
+
+== Requirements
+
+* Python 3.9+
+* Python-GSSAPI's requirements(See: https://github.com/pythongssapi/python-gssapi[pythongssapi/python-gssapi] )
+* https://github.com/stnoonan/spnego-http-auth-nginx-module[spnego-http-auth-nginx-module]
+* http://nginx.org/en/docs/http/ngx_http_auth_request_module.html[ngx_http_auth_request_module]
+
+== Installation
+
+----
+pip install .
+----
+
+== Configuration
+=== Nginx
+
+* Configure GSS authentication
+
+----
+auth_gss on;
+auth_gss_keytab /path/to/keytab;
+----
+
+* Add location block for additional authentication
+
+----
+location /auth/ { # <1>
+    internal; # <2>
+    proxy_set_header X-Remote-User $remote_user; # <3>
+    proxy_set_header X-Request-Uri $request-uri; # <4>
+    proxy_pass http://localhost:5000/auth/; # <5>
+}
+----
+<1> Define a location block for handling authentication requests.
+<2> Specify that this location is used for internal subrequests only.
+<3> Add a header to pass the remote user's username to the proxy.
+<4> Add a header to pass the original request URI to the proxy.
+<5> Forward the request to an <<acl-auth, authentication server>> running on localhost at port 5000.
+
+* Add location block for application
+
+----
+location /.../ {
+    auth_request /auth/; # <1>
+    proxy_set_header X-Remote-User $remote_user; # <2>
+    proxy_pass https://example.com/.../; # <3>
+}
+----
+<1> Specify that this location requires additional authentication.
+<2> (Optional) Add a header to pass the remote user's username to the proxy.
+<3> Forward the request to an application server.
+
+=== ACL
+Create a configuration file in JSON, and specify an array of usernames or the DN of groups allowed to access each URL, using the URLs as keys. For URLs not specified in this file, access will not be restricted (access is allowed if authenticated via SPNEGO).
+
+.ACL config example
+[,json]
+----
+{
+  "/app1/": {
+    "users": [
+      "user1",
+      "user2"
+    ],
+    "groups": [
+      "CN=Managers,OU=Sales,DC=example,DC=com",
+      ...
+    ]
+  },
+  "/app2/": {
+    ...
+  },
+  ...
+}
+----
+
+== Usage
+Export the following environment variables and run the authentication server.
+
+|===
+| Environment Variable    | Description
+
+| `AD_SERVER`             | Active Directory server
+| `CONFIG_PATH`           | Path to the <<ACL, ACL config file>>
+| `KEYTAB_PATH`           | Path to the keytab file
+| `LDAP_SEARCH_BASE`      | LDAP search base used to search for group membership
+| `SERVER_PRINCIPAL_NAME` | Server principal name
+|===
+
+----
+export AD_SERVER=ad.example.com
+export CONFIG_PATH=/path/to/config.json
+export KEYTAB_PATH=/path/to/keytab
+export LDAP_SEARCH_BASE=DC=example,DC=com
+export SERVER_PRINCIPAL_NAME=http/MYHOST.EXAMPLE.LOCAL@EXAMPLE.LOCAL
+
+gunicorn -b 127.0.0.1:5000 --daemon auth:app
+----

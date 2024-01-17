@@ -1,0 +1,10 @@
+[project]
+name = "spnego-nginx-auth-extension"
+requires-python = ">=3.9"
+dependencies = [
+  "flask~=3.0.0",
+  "gssapi~=1.8.3",
+  "gunicorn==21.2.0",
+  "ldap3~=2.9.1"
+]
+version = "0.1.0"
