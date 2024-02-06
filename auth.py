@@ -43,15 +43,22 @@ def extract_url(request_uri):
     return None
 
 
+def get_entry(url):
+    for k, v in acl.items():
+        if url.startswith(k):
+            return v
+    return None
+
+
 def get_authorized_usernames(url):
     """Return list of usernames for given url."""
-    entry = acl.get(url)
+    entry = get_entry(url)
     return entry.get("users", []) if entry else []
 
 
 def get_authorized_group_dns(url):
     """Return list of group dns for given url."""
-    entry = acl.get(url)
+    entry = get_entry(url)
     return entry.get("groups", []) if entry else []
 
 
