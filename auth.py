@@ -44,10 +44,15 @@ def extract_url(request_uri):
 
 
 def get_entry(url, port):
+    keylen = 0
+    ret_entry = None
     for k, v in acl[port].items():
-        if url.startswith(k):
-            return v
-    return None
+        now_keylen = len(k)
+        if now_keylen > keylen and url.startswith(k):
+            keylen = now_keylen
+            ret_entry = v
+    return ret_entry
+
 
 def get_authorized_usernames(url, port):
     """Return list of usernames for given url."""
