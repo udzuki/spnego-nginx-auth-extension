@@ -39,7 +39,7 @@ location /auth/ { # <1>
     internal; # <2>
     proxy_set_header X-Remote-User $remote_user; # <3>
     proxy_set_header X-Request-Uri $request-uri; # <4>
-    proxy_set_header X-Request-Port "443"; # <5>
+    proxy_set_header X-Server-Port $server_port; # <5>
     proxy_pass http://localhost:5000/auth/; # <6>
 }
 ----
