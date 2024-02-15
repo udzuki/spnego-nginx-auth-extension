@@ -44,6 +44,8 @@ def extract_url(request_uri):
 
 
 def get_entry(url, port):
+    if port not in acl:
+        return None
     for k, v in acl[port].items():
         if url.startswith(k):
             return v
