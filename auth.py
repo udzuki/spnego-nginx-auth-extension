@@ -43,22 +43,24 @@ def extract_url(request_uri):
     return None
 
 
-def get_entry(url):
-    for k, v in acl.items():
+def get_entry(url, port):
+    if port not in acl:
+        return None
+    for k, v in acl[port].items():
         if url.startswith(k):
             return v
     return None
 
 
-def get_authorized_usernames(url):
+def get_authorized_usernames(url, port):
     """Return list of usernames for given url."""
-    entry = get_entry(url)
+    entry = get_entry(url, port)
     return entry.get("users", []) if entry else []
 
 
-def get_authorized_group_dns(url):
+def get_authorized_group_dns(url, port):
     """Return list of group dns for given url."""
-    entry = get_entry(url)
+    entry = get_entry(url, port)
     return entry.get("groups", []) if entry else []
 
 
@@ -67,14 +69,15 @@ def auth():
     """Authenticate user based on ACL."""
     username = request.headers.get("X-Remote-User")
     request_uri = request.headers.get("X-Request-Uri")
+    server_port = request.headers.get("X-Server-Port")
     if not username or not request_uri:
         # Miscofigured nginx
         return make_response("Internal Server Error", 500)
 
     url = extract_url(request_uri)
 
-    authorized_usernames = get_authorized_usernames(url)
-    authorized_group_dns = get_authorized_group_dns(url)
+    authorized_usernames = get_authorized_usernames(url, server_port)
+    authorized_group_dns = get_authorized_group_dns(url, server_port)
 
     # No additional auth required
     if not authorized_usernames and not authorized_group_dns:
