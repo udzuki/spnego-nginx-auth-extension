@@ -46,10 +46,13 @@ def extract_url(request_uri):
 def get_entry(url, port):
     if port not in acl:
         return None
+    longest_match = None
+    max_length = 0
     for k, v in acl[port].items():
-        if url.startswith(k):
-            return v
-    return None
+        if url.startswith(k) and len(k) > max_length:
+            longest_match = v
+            max_length = len(k)
+    return longest_match
 
 
 def get_authorized_usernames(url, port):

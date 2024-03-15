@@ -65,6 +65,7 @@ location /.../ {
 
 === ACL
 Create a configuration file in JSON, and specify an array of usernames or the DN of groups allowed to access each URL, using the ports and URLs as keys. For URLs not specified in this file, access will not be restricted (access is allowed if authenticated via SPNEGO).
+Keys for URLs are matched based on a prefix match and longest match.
 
 .ACL config example
 [,json]
@@ -82,6 +83,9 @@ Create a configuration file in JSON, and specify an array of usernames or the DN
       ]
     },
     "/app2/": {
+      ...
+    },
+    "/app2/admin/": {
       ...
     },
     ...
